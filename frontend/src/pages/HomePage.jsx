@@ -1,33 +1,29 @@
-import { useState, useEffect } from 'react';
-import { Link } from 'react-router';
-import { Loading } from '../components/Loading';
-
+import { useEffect, useState } from "react";
+import { Loading } from "../components/Loading";
 
 export const HomePage = () => {
+  const [loading, setLoading] = useState(true);
   const [superheroes, setSuperheroes] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
 
-  const fetchSuperheroes = async () => {
-    setLoading(true);
-    setError(null);
+  const getSuperheroes = async () => {
     try {
-      const res = await fetch('/api/superheroes', { credentials: 'include' });
-      if (!res.ok) {
-        throw new Error(`error del servidor ${res.status}`);
+      const res = await fetch("http://localhost:3000/api/superheroes", {
+        credentials: "include",
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        setSuperheroes(data.data);
       }
-      const data = await res.json();
-      setSuperheroes(Array.isArray(data) ? data : []);
-    } catch (err) {
-      console.error('Error al traer los superheroes:', err);
-      setError('No se pudieron cargar los superheroes');
+    } catch (error) {
+      console.log("Error es:", error.message);
     } finally {
       setLoading(false);
     }
   };
 
   useEffect(() => {
-    fetchSuperheroes();
+    getSuperheroes();
   }, []);
 
   return (
@@ -38,47 +34,41 @@ export const HomePage = () => {
 
       <div className="flex justify-center mb-8">
         <button
-          onClick={fetchSuperheroes}
+          onClick={getSuperheroes}
           className="bg-blue-600 hover:bg-blue-700 text-white font-semibold px-6 py-2 rounded transition-colors"
         >
           Recargar
         </button>
       </div>
 
-      {loading && (
-        <div className="flex justify-center">
-          <Loading />
+      {loading && <Loading />}
+
+      {!loading && superheroes.length === 0 ? (
+        <p className="text-center text-zinc-400 pt-10">
+          No hay superheroes para mostrar
+        </p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {superheroes.map((hero) => (
+            <div
+              key={hero.id}
+              className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer"
+            >
+              <img
+                src={hero.image}
+                alt={hero.superhero}
+                className="h-64 object-cover w-full"
+              />
+
+              <div className="p-4">
+                <h3 className="text-xl font-semibold text-gray-800">
+                  {hero.superhero}
+                </h3>
+              </div>
+            </div>
+          ))}
         </div>
       )}
-
-      {error && (
-        <div className="text-center text-red-600 mb-6">{error}</div>
-      )}
-
-      {!loading && !error && superheroes.length === 0 && (
-        <div className="text-center text-gray-600">No hay superhéroes para mostrar.</div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {superheroes.map((hero) => (
-          <div
-            key={hero.id}
-            className="bg-white rounded-lg shadow-md overflow-hidden hover:shadow-xl hover:scale-105 transition-all duration-300 cursor-pointer"
-          >
-            <img
-              src={hero.image}
-              alt={hero.superhero}
-              className="h-64 object-cover w-full"
-            />
-
-            <div className="p-4">
-              <h3 className="text-xl font-semibold text-gray-800">
-                {hero.superhero}
-              </h3>
-            </div>
-          </div>
-        ))}
-      </div>
     </div>
   );
 };

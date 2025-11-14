@@ -8,7 +8,7 @@ export const Navbar = () => {
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const response = await fetch("/api/profile", {
+        const response = await fetch("http://localhost:3000/api/profile", {
           credentials: "include"
         });
         if (response.ok) {
@@ -25,7 +25,7 @@ export const Navbar = () => {
 
   const handleLogout = async () => {
     try {
-      const response = await fetch("/api/logout", {
+      const response = await fetch("http://localhost:3000/api/logout", {
         method: "POST",
         credentials: "include"
       });
